@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/net/html"
@@ -19,6 +20,10 @@ func (cfg *apiConfig) handlePreview(w http.ResponseWriter, req *http.Request) {
 	if url == "" {
 		respondWithError(w, http.StatusBadRequest, "url param is required", nil)
 		return
+	}
+
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		url = "https://" + url
 	}
 	client := &http.Client{Timeout: 5 * time.Second}
 	res, err := client.Get(url)

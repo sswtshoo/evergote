@@ -25,6 +25,8 @@ export function LinkBlock({
   const [rawText, setRawText] = useState("");
   const isClickRef = useRef(false);
 
+  const hasPreview = block.data.description || block.data.previewImage;
+
   const normalizeUrl = (url: string) => {
     if (!url) return "";
     return /^https?:\/\//i.test(url) ? url : `https://${url}`;
@@ -96,6 +98,7 @@ export function LinkBlock({
 
   return (
     <div className="group relative flex items-start gap-1 -left-5">
+      {/* Menu handle */}
       <div className="flex items-center gap-0.5 pt-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <div className="relative">
           <button
@@ -160,19 +163,56 @@ export function LinkBlock({
             autoFocus
           />
         ) : block.data.url ? (
-          <a
-            href={normalizeUrl(block.data.url)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onFocus={handleOnFocus}
-            onMouseDown={() => {
-              isClickRef.current = true;
-              enterEditing();
-            }}
-            className="text-blue-400 hover:underline w-fit"
-          >
-            {block.data.title || block.data.url}
-          </a>
+          hasPreview ? (
+            <a
+              href={normalizeUrl(block.data.url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onFocus={handleOnFocus}
+              onMouseDown={() => {
+                isClickRef.current = true;
+                enterEditing();
+              }}
+              className="flex gap-3 border border-zinc-700/40 rounded-md p-3 hover:bg-zinc-800/40 transition-colors w-full group/card"
+            >
+              {/* Text side */}
+              <div className="flex flex-col gap-1 flex-1 min-w-0">
+                <span className="text-blue-400 text-sm font-medium truncate group-hover/card:underline">
+                  {block.data.title || block.data.url}
+                </span>
+                {block.data.description && (
+                  <span className="text-zinc-500 text-xs line-clamp-2 leading-relaxed">
+                    {block.data.description}
+                  </span>
+                )}
+                <span className="text-zinc-600 text-xs truncate mt-0.5">
+                  {block.data.url}
+                </span>
+              </div>
+              {/* Preview image */}
+              {block.data.previewImage && (
+                <img
+                  src={block.data.previewImage}
+                  alt=""
+                  className="w-20 h-16 object-cover rounded shrink-0 bg-zinc-800"
+                />
+              )}
+            </a>
+          ) : (
+            <a
+              href={normalizeUrl(block.data.url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onFocus={handleOnFocus}
+              onMouseDown={() => {
+                isClickRef.current = true;
+                enterEditing();
+              }}
+              className="text-blue-400 hover:underline w-fit"
+            >
+              {block.data.title || block.data.url}
+            </a>
+          )
         ) : (
           <span
             className="text-zinc-600 text-sm cursor-text"

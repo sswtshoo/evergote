@@ -45,6 +45,7 @@ const BlockRendererComponent = (props: BlockRendererProps) => {
           mergeBlocks={props.mergeBlocks}
           splitBlock={props.splitBlock}
           setRef={props.setRef}
+          deleteBlock={props.deleteBlock}
         />
       );
     case "image":
@@ -68,6 +69,7 @@ const BlockRendererComponent = (props: BlockRendererProps) => {
           setRef={props.setRef}
           moveFocus={props.moveFocus}
           insertBlock={props.insertBlock}
+          deleteBlock={props.deleteBlock}
         />
       );
     default:

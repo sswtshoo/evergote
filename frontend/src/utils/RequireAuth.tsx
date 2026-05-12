@@ -19,7 +19,7 @@ export default function RequireAuth({ children }: RequireAuthProps) {
   }
   if (!isLoggedIn) {
     return (
-      <Navigate to="/signup" replace state={{ from: location.pathname }} />
+      <Navigate to="/signin" replace state={{ from: location.pathname }} />
     );
   }
 

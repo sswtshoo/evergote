@@ -34,7 +34,15 @@ function App() {
   };
 
   useEffect(() => {
-    handleGetNotes();
+    const getNotes = async () => {
+      const res = await apiClient.get("/api/notes");
+      if (res.status === 200) {
+        setNotes(res.data);
+      }
+      console.log(notes);
+    };
+
+    getNotes();
   }, []);
 
   const previewNote = (content: string) => {
@@ -51,7 +59,7 @@ function App() {
     return isNaN(d.getTime()) ? "" : d.toLocaleDateString();
   };
 
-  const handleNoteClick = (note: userNote) => {
+  const handleNoteClick = async (note: userNote) => {
     let content = note.content;
     try {
       if (typeof content === "string" && content.startsWith('"')) {
@@ -61,7 +69,8 @@ function App() {
       console.log("Error parsing content:", e);
     }
     setActiveNote(note);
-    setBlocks(ParseMarkdown(content));
+    const blocks = await ParseMarkdown(content, apiClient);
+    setBlocks(blocks);
   };
 
   const handleCreateNote = () => {

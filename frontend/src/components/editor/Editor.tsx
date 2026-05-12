@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { Block, ParagraphBlock } from "../../types/blocks";
 import { v4 as uuid } from "uuid";
 import { BlockRenderer } from "./BlockRenderer";
@@ -13,12 +13,6 @@ export function Editor({ blocks, setBlocks, onClose }: EditorProps) {
   const [activeBlockID, setActiveBlockID] = useState<string | null>(null);
   const blockRefs = useRef<Record<string, HTMLElement | null>>({});
   const pendingFocusRef = useRef<string | null>(null);
-
-  // useEffect(() => {
-  //   if (blocks.length > 0 && !activeBlockID) {
-  //     setActiveBlockID(blocks[0].id);
-  //   }
-  // }, [blocks, activeBlockID]);
 
   const updateBlock = useCallback(
     (id: string, updatedBlock: Block): void => {

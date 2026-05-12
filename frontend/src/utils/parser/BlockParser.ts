@@ -5,12 +5,13 @@ import {
   type LinkBlock,
 } from "../../types/blocks";
 import { v4 as uuid } from "uuid";
+import { useApiClient } from "../ApiClient";
 
 const parseCode = (
   lines: string[],
   startIndex: number,
 ): { block: CodeBlock; nextIndex: number } => {
-  let codeLines: string[] = [];
+  const codeLines: string[] = [];
   let index = startIndex + 1;
 
   while (index < lines.length && !lines[index].trim().startsWith("```")) {
@@ -35,11 +36,15 @@ const parseCode = (
   };
 };
 
+const isLinkLine = (line: string): boolean => {
+  return /^\[(.*?)\]\((.*?)\)$/.test(line);
+};
+
 const parseParagraph = (
   lines: string[],
   startIndex: number,
 ): { block: ParagraphBlock; nextIndex: number } => {
-  let paragraphLines: string[] = [];
+  const paragraphLines: string[] = [];
   let i = startIndex;
 
   while (i < lines.length) {
@@ -49,7 +54,7 @@ const parseParagraph = (
       line.trim() === "" ||
       line.trim().startsWith("```") ||
       parseImage(line) ||
-      parseLink(line)
+      isLinkLine(line)
     ) {
       break;
     }
@@ -69,17 +74,49 @@ const parseParagraph = (
   };
 };
 
-const parseLink = (line: string): LinkBlock | null => {
+const parseLink = async (
+  line: string,
+  apiClient: ReturnType<typeof useApiClient>,
+): Promise<LinkBlock | null> => {
   const match = line.match(/^\[(.*?)\]\((.*?)\)$/);
+
   if (!match) return null;
-  return {
-    id: uuid(),
-    type: "link",
-    data: {
-      title: match[1],
-      url: match[2],
-    },
-  };
+  try {
+    const res = await apiClient.get("/api/link-preview", {
+      params: { url: match[2] },
+    });
+    if (res.status === 200) {
+      return {
+        id: uuid(),
+        type: "link",
+        data: {
+          title: res.data.title,
+          url: res.data.url,
+          description: res.data.description,
+          previewImage: res.data.image,
+        },
+      };
+    } else {
+      return {
+        id: uuid(),
+        type: "link",
+        data: {
+          title: match[1],
+          url: match[2],
+        },
+      };
+    }
+  } catch (err) {
+    console.log("Error fetching link preview", err);
+    return {
+      id: uuid(),
+      type: "link",
+      data: {
+        title: match[1],
+        url: match[2],
+      },
+    };
+  }
 };
 
 const parseImage = (line: string): ImageBlock | null => {
