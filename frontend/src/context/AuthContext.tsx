@@ -4,6 +4,8 @@ import {
   useEffect,
   createContext,
   useContext,
+  useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 
@@ -33,28 +35,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAuthInitialized, setIsAuthInitialized] = useState(false);
 
-  const serverUrl = import.meta.env.VITE_SERVER_URL;
-  const login = async (email: string, password: string) => {
-    const response = await axios.post(`${serverUrl}/api/login`, {
-      email,
-      password,
-    });
-    const user = {
-      email: response.data.email,
-      name: response.data.name,
-      createdAt: response.data.created_at,
-    };
-    updateUser(user);
-    setAuthUser(user);
-  };
+  // const serverUrl = import.meta.env.VITE_SERVER_URL;
 
-  const updateUser = (user: AuthUser) => {
+  const updateUser = useCallback((user: AuthUser) => {
     localStorage.setItem("authenticated_user", JSON.stringify(user));
     setAuthUser(user);
     setIsLoggedIn(true);
-  };
+  }, []);
 
-  const logout = async () => {
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const response = await axios.post("/api/login", {
+        email,
+        password,
+      });
+      const user = {
+        email: response.data.email,
+        name: response.data.name,
+        createdAt: response.data.created_at,
+      };
+      updateUser(user);
+    },
+    [updateUser],
+  );
+
+  const logout = useCallback(async () => {
     try {
       await axios.post("/api/logout");
       localStorage.removeItem("authenticated_user");
@@ -63,11 +68,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (err) {
       console.log(err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("authenticated_user");
-
     if (storedUser) {
       setAuthUser(JSON.parse(storedUser));
       setIsLoggedIn(true);
@@ -75,14 +79,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsAuthInitialized(true);
   }, []);
 
-  const value = {
-    login,
-    logout,
-    isLoggedIn,
-    authUser,
-    isAuthInitialized,
-    updateUser,
-  };
+  const value = useMemo(
+    () => ({
+      login,
+      logout,
+      isLoggedIn,
+      authUser,
+      isAuthInitialized,
+      updateUser,
+    }),
+    [login, logout, isLoggedIn, authUser, isAuthInitialized, updateUser],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

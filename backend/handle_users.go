@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -61,7 +62,7 @@ func (cfg *apiConfig) handleCreateUser(w http.ResponseWriter, req *http.Request)
 	})
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "error creating adding refresh token to the database", err)
+		respondWithError(w, http.StatusInternalServerError, "error adding refresh token to the database", err)
 		return
 	}
 
@@ -76,9 +77,94 @@ func (cfg *apiConfig) handleCreateUser(w http.ResponseWriter, req *http.Request)
 	})
 }
 
+func (cfg *apiConfig) handleLoginUser(w http.ResponseWriter, req *http.Request) {
+	type userParams struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	userParameters := userParams{}
+	decoder := json.NewDecoder(req.Body)
+	if err := decoder.Decode(&userParameters); err != nil {
+		respondWithError(w, http.StatusBadRequest, "error decoding request params", err)
+		return
+	}
+
+	user, err := cfg.DBQueries.GetUserByEmail(req.Context(), userParameters.Email)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "user not found in the database", err)
+		return
+	}
+
+	err = auth.CheckPasswordHash(userParameters.Password, user.HashedPassword)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "wrong password", err)
+		return
+	}
+
+	accessToken, err := auth.MakeJWT(user.ID, cfg.Secret, time.Hour)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error creating jwt", err)
+		return
+	}
+
+	refreshToken, _ := auth.MakeRefreshToken()
+
+	currentRefreshToken, err := cfg.DBQueries.GetRefreshTokenByID(req.Context(), user.ID)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "refresh token doesn't exist on database", err)
+		return
+	}
+	err = cfg.DBQueries.RevokeRefreshToken(req.Context(), database.RevokeRefreshTokenParams{
+		Token:     currentRefreshToken.Token,
+		RevokedAt: sql.NullTime{Time: time.Now(), Valid: true},
+	})
+
+	expirestAt := time.Now().Add(time.Hour * 24 * 30)
+	_, err = cfg.DBQueries.CreateRefreshToken(req.Context(), database.CreateRefreshTokenParams{
+		Token:     refreshToken,
+		UserID:    user.ID,
+		CreatedAt: time.Now(),
+		ExpiresAt: expirestAt,
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error adding refresht token to the database", err)
+		return
+	}
+
+	auth.SetAuthCookies(w, accessToken, refreshToken)
+	respondWithJson(w, http.StatusOK, evergoteLoginUser{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	})
+}
+
 func (cfg *apiConfig) handleLogoutUser(w http.ResponseWriter, req *http.Request) {
-	/*
-		revoke refresh token
-		set access and refresh token in cookies to null
-	*/
+	_, err := cfg.returnUserID(w, req)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "invalid access token or user doesn't exist", err)
+		return
+	}
+
+	refreshToken, err := auth.GetRefreshToken(req)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "error fetching refresh token from cookie", err)
+		return
+	}
+
+	err = cfg.DBQueries.RevokeRefreshToken(req.Context(), database.RevokeRefreshTokenParams{
+		Token:     refreshToken,
+		RevokedAt: sql.NullTime{Time: time.Now(), Valid: true},
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error revoking refresh token in the database", err)
+		return
+	}
+
+	auth.DeleteAuthCookies(w)
+
+	w.WriteHeader(http.StatusOK)
 }

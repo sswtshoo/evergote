@@ -8,7 +8,7 @@ VALUES (
     $4
 ) RETURNING *;
 
--- name: RevokeRefreshToken :exec 
+-- name: RevokeRefreshToken :exec
 UPDATE refresh_tokens
 SET revoked_at = $2
 WHERE token = $1;

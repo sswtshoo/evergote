@@ -73,6 +73,20 @@ function App() {
     setBlocks(blocks);
   };
 
+  const handleDeleteNote = async (e: React.MouseEvent, noteId: string) => {
+    e.stopPropagation(); // prevent triggering handleNoteClick
+    try {
+      await apiClient.delete("/api/notes", { data: { id: noteId } });
+      if (activeNote?.id === noteId) {
+        setActiveNote(null);
+        setBlocks(emptyBlocks());
+      }
+      await handleGetNotes();
+    } catch (err) {
+      console.log("Error deleting note:", err);
+    }
+  };
+
   const handleCreateNote = () => {
     setActiveNote(null);
     setBlocks(emptyBlocks());
@@ -114,22 +128,41 @@ function App() {
 
         <div className="flex-1 overflow-y-auto py-2">
           {notes.map((note) => (
-            <button
-              key={note.id}
-              onClick={() => handleNoteClick(note)}
-              className={`w-full text-left px-4 py-3 transition hover:bg-neutral-800/50 border-l-2 ${
-                activeNote?.id === note.id
-                  ? "border-neutral-400 bg-neutral-800/40"
-                  : "border-transparent"
-              }`}
-            >
-              <p className="text-neutral-300 text-sm line-clamp-1 leading-snug">
-                {previewNote(note.content)}
-              </p>
-              <p className="text-neutral-600 text-xs mt-1">
-                {formatDate(note.updated_at)}
-              </p>
-            </button>
+            <div key={note.id} className="relative group/note">
+              <button
+                onClick={() => handleNoteClick(note)}
+                className={`w-full text-left px-4 py-3 transition hover:bg-neutral-800/50 border-l-2 ${
+                  activeNote?.id === note.id
+                    ? "border-neutral-400 bg-neutral-800/40"
+                    : "border-transparent"
+                }`}
+              >
+                <p className="text-neutral-300 text-sm line-clamp-1 leading-snug">
+                  {previewNote(note.content)}
+                </p>
+                <p className="text-neutral-600 text-xs mt-1">
+                  {formatDate(note.updated_at)}
+                </p>
+              </button>
+
+              <button
+                onClick={(e) => handleDeleteNote(e, note.id)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/note:opacity-100 transition-opacity p-1 rounded text-neutral-600 hover:text-red-400 hover:bg-neutral-800"
+                aria-label="Delete note"
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                >
+                  <path d="M2 3.5h10M5.5 3.5V2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v1M5 3.5l.5 7.5h3l.5-7.5" />
+                </svg>
+              </button>
+            </div>
           ))}
         </div>
       </div>

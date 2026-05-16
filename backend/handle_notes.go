@@ -15,13 +15,7 @@ func (cfg *apiConfig) handleCreateNotes(w http.ResponseWriter, req *http.Request
 		Content string `json:"content"`
 	}
 
-	accessToken, err := auth.GetAccessToken(req)
-	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "error getting access token from request", err)
-		return
-	}
-
-	userID, err := auth.ValidateJWT(accessToken, cfg.Secret)
+	userID, err := cfg.returnUserID(w, req)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "invalid access token", err)
 		return
@@ -56,13 +50,8 @@ func (cfg *apiConfig) handleCreateNotes(w http.ResponseWriter, req *http.Request
 }
 
 func (cfg *apiConfig) handleReturnNotes(w http.ResponseWriter, req *http.Request) {
-	accessToken, err := auth.GetAccessToken(req)
-	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "access token not found in request", err)
-		return
-	}
 
-	userID, err := auth.ValidateJWT(accessToken, cfg.Secret)
+	userID, err := cfg.returnUserID(w, req)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "token invalid or expired", err)
 		return
@@ -92,14 +81,7 @@ func (cfg *apiConfig) handleUpdateNotes(w http.ResponseWriter, req *http.Request
 		Title   string          `json:"title"`
 		Content json.RawMessage `json:"content"`
 	}
-
-	accessToken, err := auth.GetAccessToken(req)
-	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "error getting access token from request", err)
-		return
-	}
-
-	_, err = auth.ValidateJWT(accessToken, cfg.Secret)
+	_, err := cfg.returnUserID(w, req)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "invalid access token", err)
 		return
@@ -119,6 +101,38 @@ func (cfg *apiConfig) handleUpdateNotes(w http.ResponseWriter, req *http.Request
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error updating note", err)
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, nil)
+}
+
+func (cfg *apiConfig) handeDeleteNotesByID(w http.ResponseWriter, req *http.Request) {
+	type deleteNotesByIDParams struct {
+		ID string `json:"id"`
+	}
+
+	_, err := cfg.returnUserID(w, req)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "invalid access token or user doesn't exist", err)
+		return
+	}
+
+	deleteParams := deleteNotesByIDParams{}
+	decoder := json.NewDecoder(req.Body)
+	if err = decoder.Decode(&deleteParams); err != nil {
+		respondWithError(w, http.StatusBadRequest, "error decoding request params", err)
+		return
+	}
+
+	parsedID, err := uuid.Parse(deleteParams.ID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error parsing note id", err)
+		return
+	}
+	err = cfg.DBQueries.DeleteNote(req.Context(), parsedID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error deleting note from the database", err)
 		return
 	}
 

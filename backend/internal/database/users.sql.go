@@ -16,10 +16,10 @@ const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, email, hashed_password, name, created_at, updated_at)
 VALUES (
     $1,
-    $2, 
+    $2,
     $3,
     $4,
-    $5, 
+    $5,
     $6
 ) RETURNING id, created_at, updated_at, email, hashed_password, name
 `
@@ -42,6 +42,25 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.HashedPassword,
+		&i.Name,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, created_at, updated_at, email, hashed_password, name FROM users
+WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
