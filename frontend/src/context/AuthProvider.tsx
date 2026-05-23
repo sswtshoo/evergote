@@ -1,6 +1,6 @@
 import axios from "axios";
 import type { ReactNode } from "react";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { AuthContext } from "./AuthContext";
 import type { AuthUser } from "./AuthContext";
 
@@ -9,9 +9,19 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(() => {
+    const storedUser = localStorage.getItem("authenticated_user");
+
+    if (!storedUser) return null;
+
+    try {
+      return JSON.parse(storedUser);
+    } catch {
+      return null;
+    }
+  });
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAuthInitialized, setIsAuthInitialized] = useState(false);
 
   // const serverUrl = import.meta.env.VITE_SERVER_URL;
 
@@ -48,25 +58,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("authenticated_user");
-    if (storedUser) {
-      setAuthUser(JSON.parse(storedUser));
-      setIsLoggedIn(true);
-    }
-    setIsAuthInitialized(true);
-  }, []);
-
   const value = useMemo(
     () => ({
       login,
       logout,
       isLoggedIn,
       authUser,
-      isAuthInitialized,
       updateUser,
     }),
-    [login, logout, isLoggedIn, authUser, isAuthInitialized, updateUser],
+    [login, logout, isLoggedIn, authUser, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

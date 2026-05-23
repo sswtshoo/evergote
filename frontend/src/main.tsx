@@ -7,7 +7,7 @@ import SignupPage from "./pages/SignUp.tsx";
 import SigninPage from "./pages/SignIn.tsx";
 import RequireAuth from "./utils/RequireAuth.tsx";
 import RequireGuest from "./utils/RequireGuest.tsx";
-import { AuthProvider } from "./context/AuthContext.tsx";
+import { AuthProvider } from "./context/AuthProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

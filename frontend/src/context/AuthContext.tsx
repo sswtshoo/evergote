@@ -11,7 +11,6 @@ type AuthContextValue = {
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  isAuthInitialized: boolean;
   updateUser: (user: AuthUser) => void;
 };
 

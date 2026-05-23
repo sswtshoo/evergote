@@ -7,16 +7,8 @@ type RequireAuthProps = {
 };
 
 export default function RequireAuth({ children }: RequireAuthProps) {
-  const { isAuthInitialized, isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
   const location = useLocation();
-
-  if (!isAuthInitialized) {
-    return (
-      <>
-        <p>Initializing auth</p>
-      </>
-    );
-  }
   if (!isLoggedIn) {
     return (
       <Navigate to="/signin" replace state={{ from: location.pathname }} />

@@ -20,7 +20,7 @@ export type EditorHandle = {
 };
 
 export const Editor = forwardRef<EditorHandle, EditorProps>(
-  ({ blocks, setBlocks, onClose }, ref) => {
+  ({ blocks, setBlocks }, ref) => {
     const [activeBlockID, setActiveBlockID] = useState<string | null>(null);
     const blockRefs = useRef<Record<string, HTMLElement | null>>({});
     const pendingFocusRef = useRef<string | null>(null);
@@ -68,11 +68,11 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
       setBlocks((prevBlocks) => prevBlocks.filter((block) => block.id !== id));
     };
 
-    const replaceBlock = (id: string, newBlock: Block) => {
-      setBlocks((prevBlocks) => {
-        return prevBlocks.map((block) => (block.id === id ? newBlock : block));
-      });
-    };
+    // const replaceBlock = (id: string, newBlock: Block) => {
+    //   setBlocks((prevBlocks) => {
+    //     return prevBlocks.map((block) => (block.id === id ? newBlock : block));
+    //   });
+    // };
 
     const splitBlock = (blockId: string, cursor: number): void => {
       let newBlockID: string | null = null;
