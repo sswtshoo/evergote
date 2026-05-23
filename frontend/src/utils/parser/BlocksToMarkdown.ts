@@ -2,6 +2,7 @@ import type { Block } from "../../types/blocks";
 
 export function BlocksToMarkdown(blocks: Block[]): string {
   const parts: string[] = [];
+  let code: string;
   blocks.forEach((block) => {
     switch (block.type) {
       case "image":
@@ -11,7 +12,7 @@ export function BlocksToMarkdown(blocks: Block[]): string {
         parts.push(`[${block.data.title || ""}](${block.data.url})`);
         break;
       case "code":
-        const code = block.data.code.trim();
+        code = block.data.code.trim();
         parts.push("```\n" + code + "\n```");
         break;
       case "paragraph": {

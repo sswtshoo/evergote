@@ -1,8 +1,8 @@
 import * as motion from "motion/react-client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useApiClient } from "./utils/ApiClient";
 import type { Block } from "./types/blocks";
-import { Editor } from "./components/editor/Editor";
+import { Editor, type EditorHandle } from "./components/editor/Editor";
 import { ParseMarkdown } from "./utils/parser/MarkdownParser";
 import { BlocksToMarkdown } from "./utils/parser/BlocksToMarkdown";
 import { v4 as uuid } from "uuid";
@@ -23,6 +23,8 @@ function App() {
   const [blocks, setBlocks] = useState<Block[]>(emptyBlocks());
   const [activeNote, setActiveNote] = useState<userNote | null>(null);
   const apiClient = useApiClient();
+
+  const editorRef = useRef<EditorHandle>(null);
 
   const handleGetNotes = async () => {
     try {
@@ -71,6 +73,7 @@ function App() {
     setActiveNote(note);
     const blocks = await ParseMarkdown(content, apiClient);
     setBlocks(blocks);
+    setTimeout(() => editorRef.current?.focusFirstBlock(), 0);
   };
 
   const handleDeleteNote = async (e: React.MouseEvent, noteId: string) => {
@@ -90,6 +93,7 @@ function App() {
   const handleCreateNote = () => {
     setActiveNote(null);
     setBlocks(emptyBlocks());
+    setTimeout(() => editorRef.current?.focusFirstBlock(), 0);
   };
 
   const handleSaveNote = async () => {
@@ -151,15 +155,14 @@ function App() {
                 aria-label="Delete note"
               >
                 <svg
+                  xmlns="http://www.w3.org/2000/svg"
                   width="13"
                   height="13"
-                  viewBox="0 0 14 14"
-                  fill="none"
+                  viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth="1.5"
-                  strokeLinecap="round"
                 >
-                  <path d="M2 3.5h10M5.5 3.5V2.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v1M5 3.5l.5 7.5h3l.5-7.5" />
+                  <path d="M 10 2 L 9 3 L 3 3 L 3 5 L 4.109375 5 L 5.8925781 20.255859 L 5.8925781 20.263672 C 6.023602 21.250335 6.8803207 22 7.875 22 L 16.123047 22 C 17.117726 22 17.974445 21.250322 18.105469 20.263672 L 18.107422 20.255859 L 19.890625 5 L 21 5 L 21 3 L 15 3 L 14 2 L 10 2 z M 6.125 5 L 17.875 5 L 16.123047 20 L 7.875 20 L 6.125 5 z"></path>
                 </svg>
               </button>
             </div>
@@ -170,8 +173,9 @@ function App() {
       {/* Editor pane */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <Editor
+              ref={editorRef}
               blocks={blocks}
               setBlocks={setBlocks}
               onClose={handleCreateNote}
