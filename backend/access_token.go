@@ -7,7 +7,7 @@ import (
 	"github.com/sswtshoo/evergote/backend/internal/auth"
 )
 
-func (cfg *apiConfig) returnUserID(w http.ResponseWriter, req *http.Request) (uuid.UUID, error) {
+func (cfg *apiConfig) returnUserID(req *http.Request) (uuid.UUID, error) {
 	accessToken, err := auth.GetAccessToken(req)
 	if err != nil {
 		return uuid.Nil, err

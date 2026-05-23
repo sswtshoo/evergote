@@ -15,7 +15,7 @@ func (cfg *apiConfig) handleCreateNotes(w http.ResponseWriter, req *http.Request
 		Content string `json:"content"`
 	}
 
-	userID, err := cfg.returnUserID(w, req)
+	userID, err := cfg.returnUserID(req)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "invalid access token", err)
 		return
@@ -51,7 +51,7 @@ func (cfg *apiConfig) handleCreateNotes(w http.ResponseWriter, req *http.Request
 
 func (cfg *apiConfig) handleReturnNotes(w http.ResponseWriter, req *http.Request) {
 
-	userID, err := cfg.returnUserID(w, req)
+	userID, err := cfg.returnUserID(req)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "token invalid or expired", err)
 		return
@@ -81,7 +81,7 @@ func (cfg *apiConfig) handleUpdateNotes(w http.ResponseWriter, req *http.Request
 		Title   string          `json:"title"`
 		Content json.RawMessage `json:"content"`
 	}
-	_, err := cfg.returnUserID(w, req)
+	_, err := cfg.returnUserID(req)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "invalid access token", err)
 		return
@@ -112,7 +112,7 @@ func (cfg *apiConfig) handeDeleteNotesByID(w http.ResponseWriter, req *http.Requ
 		ID string `json:"id"`
 	}
 
-	_, err := cfg.returnUserID(w, req)
+	_, err := cfg.returnUserID(req)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "invalid access token or user doesn't exist", err)
 		return

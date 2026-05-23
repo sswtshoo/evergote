@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -106,11 +107,13 @@ func GetRefreshToken(req *http.Request) (string, error) {
 }
 
 func SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string) {
+	isProd := os.Getenv("ENV") == "production"
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     string(CookieTypeAccess),
 		Value:    accessToken,
 		HttpOnly: true,
-		Secure:   false, // set true in prod
+		Secure:   isProd,
 		Path:     "/",
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(time.Hour),
@@ -120,7 +123,7 @@ func SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string) {
 		Name:     string(CookieTypeRefresh),
 		Value:    refreshToken,
 		HttpOnly: true,
-		Secure:   false, // set true in prod
+		Secure:   isProd,
 		Path:     "/",
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(time.Hour * 24 * 30),
@@ -128,11 +131,13 @@ func SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string) {
 }
 
 func DeleteAuthCookies(w http.ResponseWriter) {
+	isProd := os.Getenv("ENV") == "production"
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     string(CookieTypeAccess),
 		Value:    "",
 		HttpOnly: true,
-		Secure:   false, // will set true in prod
+		Secure:   isProd,
 		Path:     "/",
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(-100 * time.Hour),
@@ -142,7 +147,7 @@ func DeleteAuthCookies(w http.ResponseWriter) {
 		Name:     string(CookieTypeRefresh),
 		Value:    "",
 		HttpOnly: true,
-		Secure:   false, // will set true in prod
+		Secure:   isProd,
 		Path:     "/",
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(-100 * time.Hour),

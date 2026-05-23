@@ -26,6 +26,17 @@ func (cfg *apiConfig) handleCreateUser(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	_, err = cfg.DBQueries.GetUserByEmail(req.Context(), userParams.Email)
+	if err == nil {
+		respondWithError(w, http.StatusConflict, "user already exists - try signing in", err)
+		return
+	}
+
+	if err != sql.ErrNoRows {
+		respondWithError(w, http.StatusInternalServerError, "database error", err)
+		return
+	}
+
 	hashedPassword, err := auth.HashPassword(userParams.Password)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error hashing user password", err)
@@ -143,7 +154,7 @@ func (cfg *apiConfig) handleLoginUser(w http.ResponseWriter, req *http.Request) 
 }
 
 func (cfg *apiConfig) handleLogoutUser(w http.ResponseWriter, req *http.Request) {
-	_, err := cfg.returnUserID(w, req)
+	_, err := cfg.returnUserID(req)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "invalid access token or user doesn't exist", err)
 		return
