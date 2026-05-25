@@ -47,9 +47,9 @@ A minimal, markdown-based note-taking app with Notion-inspired block editing. Wr
 ### Frontend
 
 ```bash
-cd client
-npm install
-npm run dev
+cd frontend
+bun install
+bun run dev
 ```
 
 Runs on `http://localhost:3000` by default. API requests are proxied to the backend at `http://localhost:5674`.
@@ -57,7 +57,7 @@ Runs on `http://localhost:3000` by default. API requests are proxied to the back
 ### Backend
 
 ```bash
-cd server
+cd backend
 go mod download
 go run main.go
 ```
@@ -80,7 +80,7 @@ PORT=5674
 
 ```
 evergote/
-├── client/                 # React frontend
+├── frontend/                 # React frontend
 │   ├── src/
 │   │   ├── assets/
 │   │   ├── components/
@@ -90,8 +90,14 @@ evergote/
 │   │   ├── types/          # TypeScript types
 │   │   └── utils/          # API client, markdown parser
 │   └── index.css
-└── server/                 # Go backend
-    └── main.go
+└── backend/                 # Go backend
+    ├── main.go
+    ├── internal/
+    │   ├── auth/
+    │   └── database/
+    └── sql/
+        ├── schema/
+        └── queries/
 ```
 
 ---
