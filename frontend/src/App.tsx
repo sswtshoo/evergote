@@ -1,6 +1,6 @@
 import * as motion from "motion/react-client";
 import { useEffect, useState, useRef } from "react";
-import { useApiClient } from "./utils/ApiClient";
+import { apiClient } from "./utils/ApiClient";
 import type { Block } from "./types/blocks";
 import { Editor, type EditorHandle } from "./components/editor/Editor";
 import { ParseMarkdown } from "./utils/parser/MarkdownParser";
@@ -23,7 +23,6 @@ function App() {
   const [blocks, setBlocks] = useState<Block[]>(emptyBlocks());
   const [activeNote, setActiveNote] = useState<userNote | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const apiClient = useApiClient();
   const editorRef = useRef<EditorHandle>(null);
 
   const handleGetNotes = async () => {
@@ -41,7 +40,7 @@ function App() {
       if (res.status === 200) setNotes(res.data);
     };
     getNotes();
-  }, [apiClient]);
+  }, []);
 
   const previewNote = (content: string) => {
     return content

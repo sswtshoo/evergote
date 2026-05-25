@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  // baseURL: import.meta.env.VITE_SERVER_URL,
   withCredentials: true,
 });
 
@@ -25,7 +24,7 @@ apiClient.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      await apiClient.post("/api/refresh", {}, { withCredentials: true });
+      await apiClient.post("/api/refresh");
       return apiClient({
         ...originalRequest,
         withCredentials: true,
@@ -37,4 +36,4 @@ apiClient.interceptors.response.use(
   },
 );
 
-export const useApiClient = () => apiClient;
+export { apiClient };

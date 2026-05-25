@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useState, useCallback, useMemo } from "react";
 import { AuthContext } from "./AuthContext";
 import type { AuthUser } from "./AuthContext";
+import { apiClient } from "../utils/ApiClient";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -21,9 +22,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   });
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // const serverUrl = import.meta.env.VITE_SERVER_URL;
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return !!localStorage.getItem("authenticated_user");
+  });
 
   const updateUser = useCallback((user: AuthUser) => {
     localStorage.setItem("authenticated_user", JSON.stringify(user));
@@ -33,10 +34,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const response = await axios.post("/api/login", {
+      const response = await apiClient.post("/api/login", {
         email,
         password,
       });
+
       const user = {
         email: response.data.email,
         name: response.data.name,

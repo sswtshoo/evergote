@@ -1,4 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tailwindcss";
+
 /*@plugin "@tailwindcss/typography";*/
 
 @font-face {
@@ -12,7 +14,6 @@
     font-style: normal;
 }
 
-@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:ital,wght@0,100..900;1,100..900&display=swap");
 root {
     font-family: "GeneralSans-Variable", sans-serif;
     height: 100svh;
