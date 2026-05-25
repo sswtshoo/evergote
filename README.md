@@ -2,7 +2,6 @@
 
 A minimal, markdown-based note-taking app with Notion-inspired block editing. Write in plain text, structure with blocks, and stay focused on the words.
 
-![Evergote](./src/assets/evergote-main.jpg)
 
 ---
 
@@ -23,7 +22,6 @@ A minimal, markdown-based note-taking app with Notion-inspired block editing. Wr
 |---|---|
 | Language | TypeScript |
 | Framework | React 18 |
-| Build tool | Vite |
 | Styling | Tailwind CSS v4 |
 | Routing | React Router v6 |
 | Animation | Motion (motion/react) |
