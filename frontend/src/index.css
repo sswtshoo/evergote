@@ -1,35 +1,20 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
+/*@plugin "@tailwindcss/typography";*/
 
 @font-face {
-  font-family: "GeneralSans-Variable";
-  src:
-    url("./fonts/GeneralSans-Variable.woff2") format("woff2"),
-    url("./fonts/GeneralSans-Variable.woff") format("woff"),
-    url("./fonts/GeneralSans-Variable.ttf") format("truetype");
-  font-weight: 200 700;
-  font-display: swap;
-  font-style: normal;
+    font-family: "GeneralSans-Variable";
+    src:
+        url("./fonts/GeneralSans-Variable.woff2") format("woff2"),
+        url("./fonts/GeneralSans-Variable.woff") format("woff"),
+        url("./fonts/GeneralSans-Variable.ttf") format("truetype");
+    font-weight: 200 700;
+    font-display: swap;
+    font-style: normal;
 }
 
-@font-face {
-  font-family: "Satoshi-Variable";
-  src:
-    url("./fonts/Satoshi-Variable.woff2") format("woff2"),
-    url("./fonts/Satoshi-Variable.woff") format("woff"),
-    url("./fonts/Satoshi-Variable.ttf") format("truetype");
-  font-weight: 200 700;
-  font-display: swap;
-  font-style: normal;
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:ital,wght@0,100..900;1,100..900&display=swap");
+root {
+    font-family: "GeneralSans-Variable", sans-serif;
+    height: 100svh;
+    width: 100svw;
 }
-
-:root {
-  font-family: "GeneralSans-Variable", sans-serif;
-  height: 100svh;
-  width: 100svw;
-}
-
-/* textarea {
-  /* overflow: hidden; */
-/* field-sizing: content; */
-/* } */

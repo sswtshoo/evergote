@@ -3,7 +3,7 @@ import type { Block } from "../../types/blocks";
 export function BlocksToMarkdown(blocks: Block[]): string {
   const parts: string[] = [];
   let code: string;
-  blocks.forEach((block) => {
+  blocks.forEach((block, index) => {
     switch (block.type) {
       case "image":
         parts.push(`![${block.data.alt || ""}](${block.data.url})`);
@@ -17,7 +17,11 @@ export function BlocksToMarkdown(blocks: Block[]): string {
         break;
       case "paragraph": {
         const text = block.data.text.trim();
-        if (text.length > 0) {
+        const prevBlock = blocks[index - 1];
+        const isSpuriousAfterLink =
+          prevBlock?.type === "link" && text.length === 0;
+
+        if (text.length > 0 && !isSpuriousAfterLink) {
           parts.push(text);
         }
         break;

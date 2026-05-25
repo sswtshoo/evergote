@@ -48,9 +48,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
       const newBlock: ParagraphBlock = {
         id: uuid(),
         type: "paragraph",
-        data: {
-          text: "",
-        },
+        data: { text: "" },
       };
       setBlocks((prev) => {
         const index = prev.findIndex((block) => block.id === afterID);
@@ -68,46 +66,28 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
       setBlocks((prevBlocks) => prevBlocks.filter((block) => block.id !== id));
     };
 
-    // const replaceBlock = (id: string, newBlock: Block) => {
-    //   setBlocks((prevBlocks) => {
-    //     return prevBlocks.map((block) => (block.id === id ? newBlock : block));
-    //   });
-    // };
-
     const splitBlock = (blockId: string, cursor: number): void => {
       let newBlockID: string | null = null;
       setBlocks((prev) => {
         const index = prev.findIndex((block) => block.id === blockId);
-
         if (index === -1) return prev;
-
         const block = prev[index];
-        if (block.type != "paragraph") return prev;
+        if (block.type !== "paragraph") return prev;
 
-        const text = block.data.text;
-
-        const before = text.slice(0, cursor);
-        const after = text.slice(cursor);
+        const before = block.data.text.slice(0, cursor);
+        const after = block.data.text.slice(cursor);
 
         const newBlock: ParagraphBlock = {
           id: uuid(),
           type: "paragraph",
-          data: {
-            text: after,
-          },
+          data: { text: after },
         };
 
         newBlockID = newBlock.id;
-
         const updated = [...prev];
-        updated[index] = {
-          ...block,
-          data: { text: before },
-        };
-
+        updated[index] = { ...block, data: { text: before } };
         updated.splice(index + 1, 0, newBlock);
         setTimeout(() => setActiveBlockID(newBlock.id), 0);
-
         return updated;
       });
 
@@ -121,20 +101,13 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
       setBlocks((prev) => {
         const index = prev.findIndex((block) => block.id === blockId);
         if (index === -1 || index === 0) return prev;
-
         const currentBlock = prev[index];
         const prevBlock = prev[index - 1];
-
-        if (currentBlock.type != "paragraph" || prevBlock.type != "paragraph")
+        if (currentBlock.type !== "paragraph" || prevBlock.type !== "paragraph")
           return prev;
-
         const mergedText = prevBlock.data.text + currentBlock.data.text;
         const updated = [...prev];
-        updated[index - 1] = {
-          ...prevBlock,
-          data: { text: mergedText },
-        };
-
+        updated[index - 1] = { ...prevBlock, data: { text: mergedText } };
         updated.splice(index, 1);
         return updated;
       });
@@ -142,40 +115,48 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
 
     const moveFocus = (currentBlockID: string, direction: "up" | "down") => {
       const index = blocks.findIndex((block) => block.id === currentBlockID);
-
       if (index === -1) return;
-
-      if (direction === "down" && index < blocks.length - 1) {
+      if (direction === "down" && index < blocks.length - 1)
         setActiveBlockID(blocks[index + 1].id);
-      }
-      if (direction === "up" && index > 0) {
+      if (direction === "up" && index > 0)
         setActiveBlockID(blocks[index - 1].id);
-      }
     };
 
     return (
-      <div className="flex flex-col gap-y-4 text-white">
-        {blocks.map((block) => (
-          <BlockRenderer
+      <div className="flex flex-col gap-0.5 pb-[40vh] min-h-[200px] text-neutral-50">
+        {blocks.map((block, i) => (
+          <div
             key={block.id}
-            block={block}
-            setActiveBlockID={setActiveBlockID}
-            mergeBlocks={mergeBlocks}
-            splitBlock={splitBlock}
-            updateBlock={updateBlock}
-            activeBlockID={activeBlockID}
-            isActive={activeBlockID === block.id}
-            moveFocus={moveFocus}
-            deleteBlock={deleteBlock}
-            insertBlock={insertBlock}
-            setRef={(el) => {
-              blockRefs.current[block.id] = el;
-              if (el && pendingFocusRef.current === block.id) {
-                el.focus();
-                pendingFocusRef.current = null;
-              }
-            }}
-          />
+            className="relative group/block rounded-md animate-[fadeUp_0.2s_ease_both]"
+            style={{ animationDelay: `${i * 30}ms` }}
+          >
+            <div
+              className={`absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 rounded-full bg-amber-800 transition-all duration-200 ${
+                activeBlockID === block.id
+                  ? "h-[60%] opacity-100"
+                  : "h-0 opacity-0"
+              }`}
+            />
+            <BlockRenderer
+              block={block}
+              setActiveBlockID={setActiveBlockID}
+              mergeBlocks={mergeBlocks}
+              splitBlock={splitBlock}
+              updateBlock={updateBlock}
+              activeBlockID={activeBlockID}
+              isActive={activeBlockID === block.id}
+              moveFocus={moveFocus}
+              deleteBlock={deleteBlock}
+              insertBlock={insertBlock}
+              setRef={(el) => {
+                blockRefs.current[block.id] = el;
+                if (el && pendingFocusRef.current === block.id) {
+                  el.focus();
+                  pendingFocusRef.current = null;
+                }
+              }}
+            />
+          </div>
         ))}
       </div>
     );
