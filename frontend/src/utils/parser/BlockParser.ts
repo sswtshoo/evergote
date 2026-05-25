@@ -5,7 +5,7 @@ import {
   type LinkBlock,
 } from "../../types/blocks";
 import { v4 as uuid } from "uuid";
-import { useApiClient } from "../ApiClient";
+import type { AxiosInstance } from "axios";
 
 const parseCode = (
   lines: string[],
@@ -76,7 +76,7 @@ const parseParagraph = (
 
 const parseLink = async (
   line: string,
-  apiClient: ReturnType<typeof useApiClient>,
+  apiClient: AxiosInstance,
 ): Promise<LinkBlock | null> => {
   const match = line.match(/^\[(.*?)\]\((.*?)\)$/);
 

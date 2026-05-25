@@ -5,13 +5,13 @@ import {
   parseLink,
 } from "./BlockParser";
 import { v4 as uuid } from "uuid";
-import { useApiClient } from "../ApiClient";
+import type { AxiosInstance } from "axios";
 
 import type { Block, ParagraphBlock } from "../../types/blocks";
 
 export const ParseMarkdown = async (
   markdown: string,
-  apiClient: ReturnType<typeof useApiClient>,
+  apiClient: AxiosInstance,
 ): Promise<Block[]> => {
   const blocks: Block[] = [];
   let emptyLineStreak = 0;

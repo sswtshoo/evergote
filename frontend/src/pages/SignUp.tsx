@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useApiClient } from "../utils/ApiClient";
+import { apiClient } from "../utils/ApiClient";
 import evergoteImg from "../assets/evergote-main.jpg";
 import * as motion from "motion/react-client";
 import { useAuth } from "../context/AuthContext";
@@ -23,7 +23,6 @@ function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const apiClient = useApiClient();
   const [formData, setFormData] = useState({ email: "", password: "" });
 
   const validate = (): boolean => {
