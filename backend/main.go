@@ -50,7 +50,7 @@ func main() {
 
 	mux.HandleFunc("POST /api/signup", cfg.handleCreateUser)
 	mux.HandleFunc("POST /api/login", cfg.handleLoginUser)
-	mux.HandleFunc("GET /api/logout", cfg.handleLogoutUser)
+	mux.HandleFunc("POST /api/logout", cfg.handleLogoutUser)
 	mux.HandleFunc("POST /api/notes", cfg.handleCreateNotes)
 	mux.HandleFunc("POST /api/refresh", cfg.handleRefreshJWT)
 	mux.HandleFunc("GET /api/notes", cfg.handleReturnNotes)

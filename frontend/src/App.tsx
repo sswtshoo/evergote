@@ -1,6 +1,7 @@
 import * as motion from "motion/react-client";
 import { useEffect, useState, useRef } from "react";
 import { apiClient } from "./utils/ApiClient";
+import { useAuth } from "./context/AuthContext";
 import type { Block } from "./types/blocks";
 import { Editor, type EditorHandle } from "./components/editor/Editor";
 import { ParseMarkdown } from "./utils/parser/MarkdownParser";
@@ -24,6 +25,7 @@ function App() {
   const [activeNote, setActiveNote] = useState<userNote | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const editorRef = useRef<EditorHandle>(null);
+  const { logout, authUser } = useAuth();
 
   const handleGetNotes = async () => {
     try {
@@ -221,6 +223,44 @@ function App() {
               </div>
             ))
           )}
+        </div>
+
+        {/* Sidebar footer — user + logout */}
+        <div className="shrink-0 flex items-center justify-between px-3 py-3 border-t border-[#1a1917]">
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Avatar */}
+            <div className="w-5 h-5 rounded-full bg-amber-900/40 border border-amber-900/30 flex items-center justify-center shrink-0">
+              <span className="font-['Geist_Mono'] text-[9px] text-amber-700 leading-none">
+                {authUser?.name?.charAt(0).toUpperCase() ?? "?"}
+              </span>
+            </div>
+            <span className="font-['Geist_Mono'] text-[10px] text-neutral-700 truncate">
+              {authUser?.name ?? ""}
+            </span>
+          </div>
+
+          <motion.button
+            onClick={logout}
+            className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-neutral-700 hover:text-red-400/70 hover:bg-[#1e1511] transition-colors duration-150 cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="Sign out"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </motion.button>
         </div>
       </aside>
 
