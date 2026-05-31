@@ -19,6 +19,14 @@ type Note struct {
 	UpdatedAt time.Time
 }
 
+type PasswordResetToken struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	TokenHash string
+	ExpiresAt time.Time
+	UsedAt    sql.NullTime
+}
+
 type RefreshToken struct {
 	Token     string
 	CreatedAt time.Time

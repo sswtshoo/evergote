@@ -12,3 +12,5 @@ require (
 require github.com/lib/pq v1.10.9
 
 require golang.org/x/net v0.53.0
+
+require github.com/resend/resend-go/v3 v3.7.0 // indirect

@@ -86,7 +86,7 @@ function SigninPage() {
       />
 
       <motion.div
-        className="relative z-20 w-[340px] flex flex-col gap-5 px-8 py-9 rounded-2xl backdrop-blur-2xl bg-[#0b0a09]/80"
+        className="relative z-20 w-xl flex flex-col gap-5 px-8 py-9 rounded-2xl backdrop-blur-2xl bg-[#0b0a09]/80"
         style={{
           borderTop: "1px solid rgba(200,169,126,0.12)",
           borderLeft: "1px solid rgba(200,169,126,0.06)",
@@ -192,6 +192,14 @@ function SigninPage() {
                 {errors.password}
               </motion.p>
             )}
+          </div>
+          <div className="flex justify-end">
+            <Link
+              to="/forgot-password"
+              className="font-['Geist_Mono'] text-[10px] tracking-wide text-neutral-700 hover:text-amber-700 transition-colors duration-150"
+            >
+              Forgot password?
+            </Link>
           </div>
 
           <motion.button

@@ -115,7 +115,7 @@ function SignupPage() {
       />
 
       <motion.div
-        className="relative z-20 w-[340px] flex flex-col gap-5 px-8 py-9 rounded-2xl backdrop-blur-2xl bg-[#0b0a09]/80"
+        className="relative z-20 w-xl flex flex-col gap-5 px-8 py-9 rounded-2xl backdrop-blur-2xl bg-[#0b0a09]/80"
         style={{
           borderTop: "1px solid rgba(200,169,126,0.12)",
           borderLeft: "1px solid rgba(200,169,126,0.06)",

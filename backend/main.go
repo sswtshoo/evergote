@@ -13,10 +13,12 @@ import (
 )
 
 type apiConfig struct {
-	Secret     string
-	ServerPort string
-	DBQueries  *database.Queries
-	DBUrl      string
+	Secret       string
+	ServerPort   string
+	DBQueries    *database.Queries
+	DBUrl        string
+	AppUrl       string
+	ResendAPIKey string
 }
 
 func main() {
@@ -25,6 +27,16 @@ func main() {
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		log.Fatal("server port not set in env")
+	}
+
+	appUrl := os.Getenv("APP_URL")
+	if appUrl == "" {
+		log.Fatal("app url not set in env")
+	}
+
+	resendApiKey := os.Getenv("RESEND_API_KEY")
+	if resendApiKey == "" {
+		log.Fatal("resend api key not set in env")
 	}
 
 	secret := os.Getenv("JWT_SECRET")
@@ -38,10 +50,12 @@ func main() {
 	}
 	dbQueries := database.New(db)
 	cfg := apiConfig{
-		ServerPort: port,
-		DBQueries:  dbQueries,
-		DBUrl:      dbUrl,
-		Secret:     secret,
+		ServerPort:   port,
+		DBQueries:    dbQueries,
+		DBUrl:        dbUrl,
+		Secret:       secret,
+		AppUrl:       appUrl,
+		ResendAPIKey: resendApiKey,
 	}
 	mux := http.NewServeMux()
 	assetPath := "./assets"
@@ -57,6 +71,8 @@ func main() {
 	mux.HandleFunc("PUT /api/notes", cfg.handleUpdateNotes)
 	mux.HandleFunc("GET /api/link-preview", cfg.handlePreview)
 	mux.HandleFunc("DELETE /api/notes", cfg.handeDeleteNotesByID)
+	mux.HandleFunc("POST /api/reset-password", cfg.handleResetPassword)
+	mux.HandleFunc("POST /api/forgot-password", cfg.handleSendResetLink)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.ServerPort,
