@@ -35,11 +35,13 @@ func (cfg *apiConfig) handleSendResetLink(w http.ResponseWriter, req *http.Reque
 
 	user, err := cfg.DBQueries.GetUserByEmail(req.Context(), resetParam.Email)
 	if err != nil {
+		fmt.Printf("[reset] user not found: %v\n", err)
 		return
 	}
 
 	rawBytes := make([]byte, 32)
 	if _, err = rand.Read(rawBytes); err != nil {
+		fmt.Printf("[reset] rand error: %v\n", err)
 		return
 	}
 	rawToken := hex.EncodeToString(rawBytes)
@@ -54,10 +56,14 @@ func (cfg *apiConfig) handleSendResetLink(w http.ResponseWriter, req *http.Reque
 		ExpiresAt: time.Now().Add(time.Hour),
 	})
 	if err != nil {
+		fmt.Printf("[reset] token insert error: %v\n", err)
 		return
 	}
+	fmt.Printf("[reset] token created\n")
 
 	resetUrl := fmt.Sprintf("%s/reset-password?token=%s", cfg.AppUrl, rawToken)
+	fmt.Printf("[reset] reset url: %s\n", resetUrl)
+
 	client := resend.NewClient(cfg.ResendAPIKey)
 
 	params := &resend.SendEmailRequest{
@@ -74,8 +80,11 @@ func (cfg *apiConfig) handleSendResetLink(w http.ResponseWriter, req *http.Reque
 
 	_, err = client.Emails.Send(params)
 	if err != nil {
+		fmt.Printf("[reset] resend error: %v\n", err)
 		return
 	}
+
+	fmt.Printf("[reset] email sent successfully to %s\n", user.Email)
 }
 
 func (cfg *apiConfig) handleResetPassword(w http.ResponseWriter, req *http.Request) {
