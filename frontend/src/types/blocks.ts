@@ -8,6 +8,7 @@ export interface BaseBlock {
 export interface CodeBlock extends BaseBlock {
   type: "code";
   data: {
+    language: string;
     code: string;
   };
 }

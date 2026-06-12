@@ -29,6 +29,7 @@ const parseCode = (
       id: uuid(),
       type: "code",
       data: {
+        language: "javascript",
         code: codeLines.join("\n"),
       },
     },

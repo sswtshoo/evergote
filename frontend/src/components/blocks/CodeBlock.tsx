@@ -1,6 +1,15 @@
+import { Button } from "@/components/ui/button";
+
 import type { CodeBlock } from "../../types/blocks";
 import { useState, useEffect, useRef, useDeferredValue } from "react";
 import { codeToHtml } from "shiki";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+} from "@/components/ui/dropdown-menu";
 
 interface CodeBlockProps {
   block: CodeBlock;
@@ -11,7 +20,43 @@ interface CodeBlockProps {
   splitBlock: (id: string, cursor: number) => void;
   setRef: (el: HTMLTextAreaElement | null) => void;
   deleteBlock: (id: string) => void;
+  isActive: boolean;
+  insertBlock: (afterId: string) => string;
 }
+
+const languages = {
+  Bash: "bash",
+  C: "c",
+  "C++": "cpp",
+  "C#": "csharp",
+  Go: "go",
+  Java: "java",
+  Javascript: "javascript",
+  Typescript: "typescript",
+  JSX: "jsx",
+  TSX: "tsx",
+  Python: "python",
+  Ruby: "ruby",
+  Rust: "rust",
+  Swift: "swift",
+  Kotlin: "kotlin",
+  Scala: "scala",
+  Lua: "lua",
+  PHP: "php",
+  R: "r",
+  SQL: "sql",
+  HTML: "html",
+  CSS: "css",
+  SCSS: "scss",
+  JSON: "json",
+  YAML: "yaml",
+  TOML: "toml",
+  Markdown: "markdown",
+  GraphQL: "graphql",
+  Docker: "docker",
+  Makefile: "makefile",
+  "Shell Script": "shellscript",
+};
 
 export function CodeBlock({
   block,
@@ -22,6 +67,8 @@ export function CodeBlock({
   splitBlock,
   setRef,
   deleteBlock,
+  isActive,
+  insertBlock,
 }: CodeBlockProps) {
   const [highlightedCode, setHightlightedCode] = useState<string>("");
   const deferredCode = useDeferredValue(block.data.code);
@@ -29,11 +76,24 @@ export function CodeBlock({
   const highlightRef = useRef<HTMLDivElement>(null);
   const [showMenu, setShowMenu] = useState(false);
 
+  const [currentLanguage, setCurrentLanguage] = useState(
+    block.data.language ?? "javascript",
+  );
+
+  useEffect(() => {
+    if (isActive) {
+      const id = requestAnimationFrame(() => {
+        textAreaRef.current?.focus();
+      });
+      return () => cancelAnimationFrame(id);
+    }
+  }, [isActive]);
+
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (block.data.code !== e.target.value) {
       updateBlock(block.id, {
         ...block,
-        data: { code: e.target.value },
+        data: { language: currentLanguage, code: e.target.value },
       });
     }
   };
@@ -56,7 +116,7 @@ export function CodeBlock({
 
       updateBlock(block.id, {
         ...block,
-        data: { code: newValue },
+        data: { code: newValue, language: currentLanguage },
       });
 
       requestAnimationFrame(() => {
@@ -67,6 +127,13 @@ export function CodeBlock({
     if (e.key == "Enter") {
       const start = textArea.selectionStart;
       const value = block.data.code;
+
+      if (e.shiftKey) {
+        e.preventDefault();
+        const newID = insertBlock(block.id);
+        setTimeout(() => setActiveBlockID(newID), 0);
+        return;
+      }
 
       if (value === "") {
         e.preventDefault();
@@ -88,7 +155,7 @@ export function CodeBlock({
 
       updateBlock(block.id, {
         ...block,
-        data: { code: newValue },
+        data: { code: newValue, language: currentLanguage },
       });
 
       requestAnimationFrame(() => {
@@ -133,7 +200,7 @@ export function CodeBlock({
 
     const highlight = async () => {
       const html = await codeToHtml(deferredCode, {
-        lang: "typescript",
+        lang: currentLanguage,
         theme: "dark-plus",
       });
 
@@ -141,7 +208,7 @@ export function CodeBlock({
     };
 
     highlight();
-  }, [deferredCode]);
+  }, [deferredCode, currentLanguage]);
 
   return (
     <div className="group relative flex items-start gap-1 -left-5">
@@ -163,7 +230,6 @@ export function CodeBlock({
           </button>
           {showMenu && (
             <>
-              {/* Backdrop to close menu */}
               <div
                 className="fixed inset-0 z-10"
                 onMouseDown={() => setShowMenu(false)}
@@ -185,29 +251,68 @@ export function CodeBlock({
         </div>
       </div>
 
-      {/* Existing block content */}
+      {/* block content */}
       <div className="w-full relative overflow-hidden">
-        <div
-          ref={highlightRef}
-          className="absolute inset-0 w-full pointer-events-none [&_pre]:m-0 [&_pre]:p-2 [&_pre]:py-4 [&_pre]:h-full [&_pre]:bg-transparent [&_pre]:font-mono [&_pre]:whitespace-pre [&_pre]:box-border [&_code]:block [&_pre]:text-sm [&_pre]:rounded-md"
-          dangerouslySetInnerHTML={{ __html: highlightedCode }}
-          style={{ fontFamily: "monospace" }}
-        />
-        <textarea
-          ref={(el) => {
-            textAreaRef.current = el;
-            setRef(el);
-          }}
-          value={block.data.code}
-          onChange={handleChange}
-          onFocus={handleOnFocus}
-          onKeyDown={handleKeyDown}
-          className="relative w-full font-mono text-sm p-2 py-4 bg-transparent text-transparent caret-white resize-none overflow-hidden outline-none whitespace-pre box-border rounded-md"
-          rows={1}
-          spellCheck={false}
-          id="input"
-          style={{ fontFamily: "monospace" }}
-        />
+        <div className="absolute top-2 right-2 z-10">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="evergote" size="evergote">
+                  <span>{currentLanguage}</span>
+                </Button>
+              }
+            />
+            <DropdownMenuContent className="w-32">
+              <DropdownMenuRadioGroup
+                value={currentLanguage}
+                onValueChange={(value) => {
+                  setCurrentLanguage(value);
+                  updateBlock(block.id, {
+                    ...block,
+                    data: {
+                      ...block.data,
+                      language: value,
+                    },
+                  });
+                }}
+              >
+                z
+                {Object.entries(languages).map(([label, value]) => (
+                  <DropdownMenuRadioItem
+                    value={value}
+                    className="font-mono text-xs"
+                  >
+                    {label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="relative">
+          <div
+            ref={highlightRef}
+            className="absolute inset-0 w-full pointer-events-none [&_pre]:m-0 [&_pre]:p-2 [&_pre]:pt-10 [&_pre]:pb-10 [&_pre]:h-full [&_pre]:bg-transparent [&_pre]:font-mono [&_pre]:whitespace-pre [&_pre]:box-border [&_code]:block [&_pre]:text-sm [&_pre]:rounded-md"
+            dangerouslySetInnerHTML={{ __html: highlightedCode }}
+            style={{ fontFamily: "monospace" }}
+          />
+          <textarea
+            ref={(el) => {
+              textAreaRef.current = el;
+              setRef(el);
+            }}
+            value={block.data.code}
+            onChange={handleChange}
+            onFocus={handleOnFocus}
+            onKeyDown={handleKeyDown}
+            className="relative w-full font-mono text-sm p-2 pt-10 pb-10 bg-transparent text-transparent caret-white resize-none overflow-hidden outline-none whitespace-pre box-border rounded-md"
+            rows={1}
+            spellCheck={false}
+            id="input"
+            style={{ fontFamily: "monospace" }}
+          />
+        </div>
       </div>
     </div>
   );

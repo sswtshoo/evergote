@@ -63,7 +63,16 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
     };
 
     const deleteBlock = (id: string) => {
-      setBlocks((prevBlocks) => prevBlocks.filter((block) => block.id !== id));
+      setBlocks((prevBlocks) => {
+        if (prevBlocks.length <= 1) return prevBlocks;
+        return prevBlocks.filter((block) => block.id !== id);
+      });
+    };
+
+    const replaceBlock = (id: string, newBlock: Block) => {
+      setBlocks((prevBlocks) =>
+        prevBlocks.map((block) => (block.id === id ? newBlock : block)),
+      );
     };
 
     const splitBlock = (blockId: string, cursor: number): void => {
@@ -130,13 +139,13 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
             className="relative group/block rounded-md animate-[fadeUp_0.2s_ease_both]"
             style={{ animationDelay: `${i * 30}ms` }}
           >
-            <div
+            {/*<div
               className={`absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 rounded-full bg-amber-800 transition-all duration-200 ${
                 activeBlockID === block.id
                   ? "h-[60%] opacity-100"
                   : "h-0 opacity-0"
               }`}
-            />
+            />*/}
             <BlockRenderer
               block={block}
               setActiveBlockID={setActiveBlockID}
@@ -148,6 +157,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(
               moveFocus={moveFocus}
               deleteBlock={deleteBlock}
               insertBlock={insertBlock}
+              replaceBlock={replaceBlock}
               setRef={(el) => {
                 blockRefs.current[block.id] = el;
                 if (el && pendingFocusRef.current === block.id) {

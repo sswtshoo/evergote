@@ -12,6 +12,7 @@ interface ParagraphBlockProps {
   moveFocus: (currentBlockID: string, direction: "up" | "down") => void;
   setRef: (el: HTMLElement | null) => void;
   deleteBlock: (id: string) => void;
+  replaceBlock: (id: string, newBlock: Block) => void;
 }
 
 export function ParagraphBlock({
@@ -24,6 +25,7 @@ export function ParagraphBlock({
   moveFocus,
   setRef,
   deleteBlock,
+  replaceBlock,
 }: ParagraphBlockProps) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -45,6 +47,19 @@ export function ParagraphBlock({
   }, [block.data.text]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    if (value === "```") {
+      replaceBlock(block.id, {
+        id: block.id,
+        type: "code",
+        data: {
+          code: "",
+          language: "javascript",
+        },
+      });
+      setActiveBlockID(block.id);
+      return;
+    }
     if (block.data.text !== e.target.value) {
       updateBlock(block.id, {
         ...block,
@@ -57,7 +72,7 @@ export function ParagraphBlock({
     if (e.key == "Enter") {
       e.preventDefault();
       const cursor = e.currentTarget.selectionStart;
-      console.log("cursor position:", cursor);
+      // console.log("cursor position:", cursor);
       splitBlock(block.id, cursor);
     }
 

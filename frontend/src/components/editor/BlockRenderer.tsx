@@ -17,6 +17,7 @@ interface BlockRendererProps {
   setRef: (el: HTMLElement | null) => void;
   deleteBlock: (id: string) => void;
   insertBlock: (afterID: string) => string;
+  replaceBlock: (id: string, newBlock: Block) => void;
 }
 
 const BlockRendererComponent = (props: BlockRendererProps) => {
@@ -33,6 +34,7 @@ const BlockRendererComponent = (props: BlockRendererProps) => {
           moveFocus={props.moveFocus}
           setRef={props.setRef}
           deleteBlock={props.deleteBlock}
+          replaceBlock={props.replaceBlock}
         />
       );
     case "code":
@@ -46,6 +48,8 @@ const BlockRendererComponent = (props: BlockRendererProps) => {
           splitBlock={props.splitBlock}
           setRef={props.setRef}
           deleteBlock={props.deleteBlock}
+          isActive={props.isActive}
+          insertBlock={props.insertBlock}
         />
       );
     case "image":

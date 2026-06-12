@@ -33,6 +33,7 @@ A minimal, markdown-based note-taking app with Notion-inspired block editing. Wr
 | Language | Go |
 | Database | PostgreSQL |
 | Auth | JWT (JSON Web Tokens) |
+| Email | Resend |
 
 ---
 
@@ -72,6 +73,9 @@ Create a `.env` file in the server directory:
 DATABASE_URL=postgres://user:password@localhost:5432/evergote
 JWT_SECRET=your-secret-key
 PORT=5674
+RESEND_API_KEY=your-resend-api-key
+APP_URL=http://localhost:3000
+
 ```
 
 ---
